@@ -3,6 +3,7 @@
 LiquidCrystal_I2C LCD(0x3F, 16, 2); // присваиваем имя lcd для дисплея
 
 int level = 1;       // переменная для отсчета уровня
+int money = 0;
 int pause = 400; // переменная для задержки
 byte p = 0;          // переменная для времени прыжка
 
@@ -11,7 +12,7 @@ int yPin = A1; // Пин для оси Y джойстика
 int buttonPin = 2; // Пин для кнопки джойстика
 
 // создаем массивы дракончика, дерева, камня и птицы
-byte dracon[8] = {
+byte dracon1[8] = {
   0b01110,
   0b11011,
   0b11111,
@@ -20,6 +21,16 @@ byte dracon[8] = {
   0b01100,
   0b10011,
   0b11000
+};
+byte dracon2[8] = {
+  0b01110,
+  0b11011,
+  0b11111,
+  0b11111,
+  0b11100,
+  0b01100,
+  0b11010,
+  0b00011
 };
 byte derevo[8] = {
   0b00000,
@@ -51,15 +62,15 @@ byte ptica[8] = {
   0b00000,
   0b00000
 };
-byte dracon1[8] = {
+byte moneta[8] = {
   0b01110,
-  0b11011,
-  0b11111,
-  0b11111,
-  0b11100,
-  0b01100,
-  0b11010,
-  0b00011
+  0b10001,
+  0b10101,
+  0b10101,
+  0b10101,
+  0b10101,
+  0b10001,
+  0b01110
 };
 
 void setup() {
@@ -69,12 +80,13 @@ void setup() {
   LCD.backlight();              // включение подсветки дисплея
 
   // создаем символы дракончика, дерева, камня и птицы
-  LCD.createChar(0, dracon);
+  LCD.createChar(0, dracon1);
   LCD.createChar(1, derevo);
   LCD.createChar(2, kamen);
   LCD.createChar(3, ptica);
-  LCD.createChar(4, dracon1);
-  
+  LCD.createChar(4, moneta);
+  LCD.createChar(5, dracon2);
+
   // начинаем игру: выводим надпись GO!
   LCD.setCursor(7, 0);
   LCD.print("GO!");
@@ -89,17 +101,20 @@ void loop() {
   byte y = 1;
   byte a = 0;
   // выбираем препятствие, которое появится, рандомно
-  byte i = random (1, 4);
+  byte i = random (1, 5);
   if (i == 3) y = 0;
   else y = 1;
+  if (i == 4) y = random (0, 2);
 
   while (x > 0) {
-    // очищаем экран и выводим номер уровня
+    // очищаем экран и выводим номер уровня и количество монет
     LCD.clear();
     LCD.setCursor(0, 0);
     LCD.print(level);
+    LCD.setCursor(0, 1);
+    LCD.print(money);
 
-    
+
     //int xAxisValue = analogRead(xPin);
     int yAxisValue = analogRead(yPin);
 
@@ -113,7 +128,7 @@ void loop() {
 
     // выводим дракончика в нужной строке
     LCD.setCursor(3, d);
-    if (a == 0) a = 4;
+    if (a == 0) a = 5;
     else a = 0;
     LCD.print(char(a));
     // выводим препятствие
@@ -124,37 +139,45 @@ void loop() {
 
     // если дракончик наткнулся на препятствие выводим надпись GAME OVER!
     if (x == 3 && y == d) {
-      LCD.clear();
-      delay(200);
-      LCD.setCursor(3, 0);
-      LCD.print("GAME OVER!");
-      delay(600);
-      LCD.clear();
-      delay(400);
-      LCD.setCursor(3, 0);
-      LCD.print("GAME OVER!");
-      delay(600);
-      LCD.clear();
-      LCD.setCursor(3, 1);
-      LCD.print("LEVEL: ");
-      LCD.print(level);
-      delay(400);
-      LCD.setCursor(3, 0);
-      LCD.print("GAME OVER!");
-      delay(3000);
-      LCD.clear();
+      if (i == 4) {
+        money = money + 1;
+        LCD.setCursor(0, 1);
+        LCD.print(money);
+      }
+      else {
+        LCD.clear();
+        delay(200);
+        LCD.setCursor(3, 0);
+        LCD.print("GAME OVER!");
+        delay(600);
+        LCD.clear();
+        delay(400);
+        LCD.setCursor(3, 0);
+        LCD.print("GAME OVER!");
+        delay(600);
+        LCD.clear();
+        LCD.setCursor(3, 1);
+        LCD.print("LEVEL: ");
+        LCD.print(level);
+        delay(400);
+        LCD.setCursor(3, 0);
+        LCD.print("GAME OVER!");
+        delay(3000);
+        LCD.clear();
 
-      // начинаем игру заново, обнулив уровень игры
-      LCD.setCursor(7, 0);
-      LCD.print("GO!");
-      LCD.clear();
+        // начинаем игру заново, обнулив уровень игры
+        LCD.setCursor(7, 0);
+        LCD.print("GO!");
+        LCD.clear();
 
-      level = 0;
-      pause = 400;
-      p = 0;
-      y = 1;
-      x = 0;
-      break;
+        level = 0;
+        pause = 400;
+        p = 0;
+        y = 1;
+        x = 0;
+        money = 0;
+        break;
+      }
     }
 
     // если дракончик не столкнулся, то меняем положение препятствия
