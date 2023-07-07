@@ -52,25 +52,45 @@ byte kamen[8] = {
   0b01110,
   0b11111
 };
-byte ptica[8] = {
+byte ptica1[8] = {
+  0b01100,
+  0b11100,
   0b00100,
-  0b00101,
-  0b01111,
+  0b00100,
   0b11111,
-  0b10100,
+  0b01110,
   0b00100,
-  0b00000,
-  0b00000
+  0b01010
 };
-byte moneta[8] = {
+byte ptica2[8] = {
+  0b01100,
+  0b11100,
+  0b10101,
+  0b11111,
+  0b01110,
+  0b00100,
+  0b00100,
+  0b01010
+};
+byte moneta1[8] = {
+  0b00000,
   0b01110,
   0b10001,
   0b10101,
   0b10101,
+  0b10001,
+  0b01110,
+  0b00000
+};
+byte moneta2[8] = {
+  0b01110,
+  0b10001,
   0b10101,
   0b10101,
   0b10001,
-  0b01110
+  0b01110,
+  0b00000,
+  0b00000
 };
 
 void setup() {
@@ -83,9 +103,11 @@ void setup() {
   LCD.createChar(0, dracon1);
   LCD.createChar(1, derevo);
   LCD.createChar(2, kamen);
-  LCD.createChar(3, ptica);
-  LCD.createChar(4, moneta);
+  LCD.createChar(3, ptica1);
+  LCD.createChar(4, moneta1);
   LCD.createChar(5, dracon2);
+  LCD.createChar(6, ptica2);
+  LCD.createChar(7, moneta2);
 
   // начинаем игру: выводим надпись GO!
   LCD.setCursor(7, 0);
@@ -128,14 +150,19 @@ void loop() {
 
     // выводим дракончика в нужной строке
     LCD.setCursor(3, d);
-    if (a == 0) a = 5;
-    else a = 0;
-    LCD.print(char(a));
+    if (a == 0) {
+      a = 3;
+      LCD.print(char(0));
+    }
+    else {
+      a = 0;
+      LCD.print(char(5));
+    }
     // выводим препятствие
     LCD.setCursor(x, y);
     tone(10, 50);
-    LCD.print(char(i));
-    noTone(10);
+    if (i == 3 || i == 4) LCD.print(char(i+a));
+    else LCD.print(char(i));
 
     // если дракончик наткнулся на препятствие выводим надпись GAME OVER!
     if (x == 3 && y == d) {
